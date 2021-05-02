@@ -2,7 +2,6 @@
 --
 -- Robert Long
 --
--- Basic Declarations
 
 import Data.List
 
@@ -11,8 +10,9 @@ type Matrix = [[Int]]
 
 numRows :: Matrix -> Int
 numRows = length
-numColumns :: Matrix -> Int
-numColumns = length . head
+
+numcols :: Matrix -> Int
+numcols = length . head
 
 zeroVector :: Int -> Vector
 zeroVector n = replicate n 0
@@ -35,6 +35,11 @@ dotProduct v w = sum ( zipWith (*) v w )
 matrixProduct :: Matrix -> Matrix -> Matrix
 matrixProduct m n = [ map (dotProduct row) (transpose n) | row <- m ]
 
+trace :: Matrix -> Maybe Int
+trace m 
+    | numRows m /= numcols m = Nothing
+    | otherwise = Just $ sum (zipWith (!!) m [0..])
+
 cut :: [a] -> Int -> [a]
 cut [ ] n = [ ]
 cut xs n
@@ -43,7 +48,7 @@ cut xs n
 
 remove :: Matrix -> Int -> Int -> Matrix
 remove m i j
-    | m == [ ] || i < 1 || i > numRows m || j < 1 || j > numColumns m = error "remove: (i,j) out of range"
+    | m == [ ] || i < 1 || i > numRows m || j < 1 || j > numcols m = error "remove: (i,j) out of range"
     | otherwise = transpose ( cut (transpose ( cut m i ) ) j )
     
 det :: Matrix -> Int
@@ -51,7 +56,7 @@ det [ ] = error "determinant: 0-by-0 matrix"
 det [[n]] = n
 det m 
         = sum [ (-1)^ (j+1) * (head m)!!(j-1) * det (remove m 1 j) |
-        j <- [1..(numColumns m) ] ]
+        j <- [1..(numcols m) ] ]
 
 cofactor :: Matrix -> Int -> Int -> Int
 cofactor m i j = (-1)^ (i+j) * det (remove m i j)
