@@ -8,6 +8,11 @@ import Data.List
 type Vector = [Int]
 type Matrix = [[Int]]
 
+m1, m2, m3 :: Matrix
+m1 = [[1,2], [3,4]]
+m2 = [[1,2,3],[4,5,6],[7,8,9]]
+m3 = [[1,2],[3,4],[5,6]]
+
 numRows :: Matrix -> Int
 numRows = length
 
@@ -34,6 +39,11 @@ dotProduct v w = sum ( zipWith (*) v w )
 
 matrixProduct :: Matrix -> Matrix -> Matrix
 matrixProduct m n = [ map (dotProduct row) (transpose n) | row <- m ]
+
+diag :: Matrix -> Maybe Vector
+diag m 
+    | numRows m /= numcols m = Nothing
+    | otherwise = Just (zipWith (!!) m [0..])
 
 trace :: Matrix -> Maybe Int
 trace m 
