@@ -5,8 +5,8 @@
 
 import Data.List
 
-type Vector = [Int]
-type Matrix = [[Int]]
+type Vector = [Float]
+type Matrix = [Vector]
 
 m1, m2, m3 :: Matrix
 m1 = [[1,2], [3,4]]
@@ -19,8 +19,8 @@ numRows = length
 numcols :: Matrix -> Int
 numcols = length . head
 
-zeroVector :: Int -> Vector
-zeroVector n = replicate n 0
+zeroVector :: Float -> Vector
+zeroVector n = replicate n 0.0
 
 vectorScalarProduct :: Int -> Vector -> Vector
 vectorScalarProduct n vec = [ n * x | x <- vec ]
@@ -34,7 +34,7 @@ vectorSum = zipWith (+)
 matrixSum :: Matrix -> Matrix -> Matrix
 matrixSum = zipWith vectorSum
 
-dotProduct :: Vector -> Vector -> Int
+dotProduct :: Vector -> Vector -> Float
 dotProduct v w = sum ( zipWith (*) v w )
 
 matrixProduct :: Matrix -> Matrix -> Matrix
