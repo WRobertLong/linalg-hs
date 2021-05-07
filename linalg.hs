@@ -1,9 +1,10 @@
--- Linear algebra in Haskell
+-- Statistics in Haskell usinh linear algebra
 --
 -- Robert Long
 --
 
 import Data.List
+import Text.Printf 
 
 type Vector = [Double]
 type Matrix = [Vector]
@@ -14,6 +15,8 @@ m1 = [[1.0,2.0], [3.0,4.0]]
 m2 = [[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]]
 m3 = [[1.0,2.0],[3.0,4.0],[5.0,6.0]]
 m4 = [[3.0,0.0,2.0],[2.0,0.0,-2.0],[0.0,1.0,1.0]]
+
+-- Linear algebra functions
 
 -- number of rows of a Matrix
 numRows :: Matrix -> Int
@@ -70,10 +73,15 @@ matrixProduct :: Matrix -> Matrix -> Matrix
 matrixProduct m n = [ map (dotProduct row) (transpose n) | row <- m ]
 
 -- the centre diagonal of the square matrix
-diag :: Matrix -> Maybe Vector
+--diag :: Matrix -> Maybe Vector
+--diag m 
+--    | numRows m /= numcols m = Nothing
+--    | otherwise = Just (zipWith (!!) m [0..])
+
+diag :: Matrix -> Vector
 diag m 
-    | numRows m /= numcols m = Nothing
-    | otherwise = Just (zipWith (!!) m [0..])
+    | numRows m /= numcols m = error "diag of a non-square matrix is undefined"
+    | otherwise = (zipWith (!!) m [0..])
 
     -- the trace of a square matrix
 trace :: Matrix -> Maybe Double
@@ -112,63 +120,119 @@ cofactorMatrix m =
 inverse :: Matrix -> Matrix
 inverse m = transpose [ [ x / (det m) | x <- row ] |
     row <- (cofactorMatrix m) ]
-
-elemMatrix :: Int -> Int -> Int -> Double -> Matrix
- -- elemMatrix n i j v is the n-by-n elementary matrix
- -- with v in the (i,j) place
-elemMatrix n i j v = [ [ entry row column | column <- [1..n] ] | row <- [1..n] ]
-   where
-   entry x y
-     | x == y = 1
-     | x == i && y == j = v
-     | otherwise = 0
-    
-idMatrix :: Int -> Matrix -- identity matrix
-idMatrix n = elemMatrix n 1 1 1
-
-eProduct :: Int -> [(Int, Int, Double)] -> Matrix
--- eProduct n [(Int,Int,Double)] is the product of the elementary matrices
-eProduct n [ ] = idMatrix n
-eProduct n ((i,j,value):rest) = matrixProduct ( elemMatrix n i j value)
-  (eProduct n rest)
-
-minSize :: [(Int,Int,Double)] -> Int
--- smallest size of matrix for which all elementary matrices are defined
-minSize list = maximum (concat [ [i,j] | (i,j,value) <- list ] )
-
-checkInverse :: [(Int,Int,Double)] -> String
-checkInverse list =
-  "\n M = " ++ (show m) ++ "\nInverse(M) = " ++ (show (inverse m)) ++
-  if matrixProduct m (inverse m) == idMatrix n then "\nOK.\n" else "\nError.\n"
-  where
-  m = eProduct n list
-  n = minSize list
-
-list1 :: [(Int,Int,Double)]
-list1 = [(1,2,1.0), (1,3,-1.0), (1,2,1.0), (3,2,-2.0), (3,1,-3.0)]
-list2 :: [(Int,Int,Double)]
-list2 = [(1,2,4.0), (4,2,-1.0), (4,1,-2.0), (4,1,1.0), (1,3,-3.0), (2,3,2.0),
-  (1,2,2.0), (1,4,-3.0), (1,3,-1.0), (3,2,-1.0), (3,1,-1.0)]
   
-test :: IO()
-test = putStr (( checkInverse list1 ) ++ ( checkInverse list2 ) )
+-- Statistical functions
+
+-- sample mean
+mean :: Vector -> Double
+mean [] = error "mean of empty Vector is not defined"
+mean xs = sum xs / fromIntegral (length xs)
+
+-- sample variance
+var :: Vector -> Double
+var [] = error "variance of empty Vector is not defined"
+var xs = sum (map (^2) (map (subtract (mean xs)) xs)) / fromIntegral (length xs - 1)
+
+
+-- simple regression check
+-- x :: Matrix
+-- x = [[1.0, 1.0],[1.0,2.0],[1.0,3.0]]
+--
+-- y :: Vector
+-- y = [0.3735462, 2.1836433, 2.1643714]
+
+--  multiple regression check
+
+--x :: Matrix
+--x = [[1, -0.6264538, -0.8204684],
+--     [1,  0.1836433,  0.4874291],
+--     [1, -0.8356286,  0.7383247],
+--     [1,  1.5952808,  0.5757814],
+--     [1,  0.3295078, -0.3053884]]
+--
+--y :: Vector     
+--y = [0.06485897,  1.06091561, -0.71854449, -0.04363773,  1.14905030]
 
 x :: Matrix
-x = [[1.0, 1.0],[1.0,2.0],[1.0,3.0]]
+x = [[1, 68.5, 16.7],
+     [1, 45.2, 16.8],
+     [1, 91.3, 18.2],
+     [1, 47.8, 16.3],
+     [1, 46.9, 17.3],
+     [1, 66.1, 18.2],
+     [1, 49.5, 15.9],
+     [1, 52.0, 17.2],
+     [1, 48.9, 16.6],
+     [1, 38.4, 16.0],
+     [1, 87.9, 18.3],
+     [1, 72.8, 17.1],
+     [1, 88.4, 17.4],
+     [1, 42.9, 15.8],
+     [1, 52.5, 17.8],
+     [1, 85.7, 18.4],
+     [1, 41.3, 16.5],
+     [1, 51.7, 16.3],
+     [1, 89.6, 18.1],
+     [1, 82.7, 19.1],
+     [1, 52.3, 16.0]]
 
-y :: Vector
-y = [0.3735462, 2.1836433, 2.1643714]
+y :: Vector     
+y = [174.4, 164.4, 244.2, 154.6, 181.6, 207.5, 152.8, 163.2, 145.4, 137.2, 
+     241.9, 191.1, 232.0, 145.3, 161.1, 209.7, 146.4, 144.0, 232.6, 224.1, 166.5]
+
+n = numRows x
+
+p = numcols x - 1
+
+inverse_X_X' = inverse (matrixProduct (transpose x) x)
 
 hat = matrixProduct (inverse (matrixProduct (transpose x) x)) (transpose x)
 
-b = mvProduct hat y
+hat1 = matrixProduct inverse_X_X' (transpose x)
 
-fitted = mvProduct x b
+betas = mvProduct hat y
 
-residuals = vectorSum y (negV fitted)
+fitted = mvProduct x betas
+
+-- residuals
+res = vectorSum y (negV fitted)
 
 
--- hat =  matrixProduct (inverse (matrixProduct (transpose x) x)) (transpose x)
--- b = mvProduct hat y
+-- Total sum of squares
+ssto = sum ( map (^2) (map (subtract (mean y)) y) )
 
--- solve(t(X) %*% X) %*% t(X) %*% dt$y  R code
+-- Sum of squared errors
+sse = sum ( map (^2) res )
+
+-- Regression sum of squares
+ssr = ssto - sse
+
+-- mean squared error
+mse = sse / fromIntegral (n - p - 1)
+
+-- regression mean square
+msr = ssr / fromIntegral (p)
+
+-- F statistic for the regresion
+f = msr / mse
+-- on p and n-p-1 degrees of freedom
+
+-- mean squared error
+-- mse = (sum $ map (^2) res ) / (fromIntegral (n - p - 1))
+
+-- standard error of regression coefficients
+se_coef = map (sqrt) (diag ( matrixScalarProduct mse inverse_X_X' ))
+
+r2 = 1 - (sse / ssto)
+
+r2_adj = 1 - (mse / var y)
+
+vector_to_string :: Vector -> String
+vector_to_string xs = unwords $ printf "%.3f" <$> xs
+
+lm :: IO()
+lm = putStr ( "Estimates:   " ++ (vector_to_string betas) ++ "\n" ++ 
+              "Std. Error:  " ++ (vector_to_string se_coef )++ "\n" ++
+              "R-squared:   " ++ printf "%.3f" r2 ++ "  Adj R-sq:  " ++ printf "%.3f" r2_adj ++ "\n" ++
+              "F Statistic: " ++ printf "%.3f" f ++ " on " ++ show p ++ " and " ++ show (n - p - 1) ++ " degrees of freedom" ++
+              "\n")
