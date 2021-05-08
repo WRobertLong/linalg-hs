@@ -10,13 +10,21 @@ type Vector = [Double]
 type Matrix = [Vector]
 
 -- test matrices
-m1, m2, m3 :: Matrix
+m1, m2, m3, h :: Matrix
 m1 = [[1.0,2.0], [3.0,4.0]]
 m2 = [[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]]
 m3 = [[1.0,2.0],[3.0,4.0],[5.0,6.0]]
 m4 = [[3.0,0.0,2.0],[2.0,0.0,-2.0],[0.0,1.0,1.0]]
 
--- Linear algebra functions
+-- hilbert matrix
+h = [[1, 1/2, 1/3, 1/4, 1/5],
+   [1/2, 1/3, 1/4, 1/5, 1/6],
+   [1/3, 1/4, 1/5, 1/6, 1/7],
+   [1/4, 1/5, 1/6, 1/7, 1/8],
+   [1/5, 1/6, 1/7, 1/8, 1/9]]
+   
+
+   -- Linear algebra functions
 
 -- number of rows of a Matrix
 nrow :: Matrix -> Int
@@ -236,9 +244,15 @@ r2 = 1 - (sse / ssto)
 -- adjusted r-squared
 r2_adj = 1 - (mse / var y)
 
--- helper function for output
+-- helper functions for output
+
 vector_to_string :: Vector -> String
 vector_to_string xs = unwords $ printf "%.3f" <$> xs
+
+matrix_to_string :: Matrix -> String
+matrix_to_string m =
+    concat $ intersperse "\n"
+        (map (\x -> unwords $ printf "%.3f" <$> (x::[Double])) m )
 
 lm :: IO()
 lm = putStr ( "Estimates:   " ++ (vector_to_string betas) ++ "\n" ++ 

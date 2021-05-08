@@ -95,9 +95,15 @@ inverse m = transpose [ [ x / (det m) | x <- cofm ] |
 -- Statistical functions
 
 -- sample mean
-mean :: Vector -> Double
+mean :: [Double] -> Double
 mean [] = error "mean of empty Vector is not defined"
 mean xs = sum xs / fromIntegral (length xs)
+
+mean1 :: (Real a, Fractional b) => [a] -> b
+mean1 xs = realToFrac (sum xs) / genericLength xs
+
+foo :: [Int]
+foo = [1,2,3]
 
 -- sample variance
 var :: Vector -> Double
@@ -163,9 +169,15 @@ r2 = 1 - (sse / ssto)
 -- adjusted r-squared
 r2_adj = 1 - (mse / var y)
 
--- helper function for output
+-- helper functions for output
+
 vector_to_string :: Vector -> String
 vector_to_string xs = unwords $ printf "%.3f" <$> xs
+
+matrix_to_string :: Matrix -> String
+matrix_to_string m =
+    concat $ intersperse "\n"
+        (map (\x -> unwords $ printf "%.3f" <$> (x::[Double])) m )
 
 lm :: IO()
 lm = putStr ("Estimates:   " ++ (vector_to_string betas) ++ "\n" ++ 
